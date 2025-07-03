@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Calculator, Heart, Star, Mail } from 'lucide-react';
 
 const App = () => {
@@ -26,23 +26,7 @@ const App = () => {
 
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-  const handleDayChange = (dayIndex, sessionType) => {
-    const newAttendanceDays = [...attendanceDays];
-    newAttendanceDays[dayIndex] = sessionType;
-    setAttendanceDays(newAttendanceDays);
-  };
-
-  const removeDayAttendance = (dayIndex) => {
-    const newAttendanceDays = [...attendanceDays];
-    newAttendanceDays[dayIndex] = null;
-    setAttendanceDays(newAttendanceDays);
-  };
-
-  useEffect(() => {
-    calculateFees();
-  }, [fundingType, fundingPattern, attendanceDays]);
-
-  const calculateFees = () => {
+  const calculateFees = useCallback(() => {
     if (attendanceDays.filter(day => day).length === 0) {
       setResults(null);
       return;
@@ -92,7 +76,23 @@ const App = () => {
       totalEnrichmentFees: Math.round(totalEnrichmentFees * 100) / 100,
       weeklyFundingHours: Math.round(weeklyFundingHours * 100) / 100
     });
+  }, [fundingType, fundingPattern, attendanceDays, RATES.hourlyRate, RATES.enrichmentFullyFunded, RATES.enrichmentPartFunded, FUNDING_HOURS, sessionTypes, daysOfWeek]);
+
+  const handleDayChange = (dayIndex, sessionType) => {
+    const newAttendanceDays = [...attendanceDays];
+    newAttendanceDays[dayIndex] = sessionType;
+    setAttendanceDays(newAttendanceDays);
   };
+
+  const removeDayAttendance = (dayIndex) => {
+    const newAttendanceDays = [...attendanceDays];
+    newAttendanceDays[dayIndex] = null;
+    setAttendanceDays(newAttendanceDays);
+  };
+
+  useEffect(() => {
+    calculateFees();
+  }, [calculateFees]);
 
   return (
     <div className="min-h-screen" style={{backgroundColor: '#d5eeeb'}}>
