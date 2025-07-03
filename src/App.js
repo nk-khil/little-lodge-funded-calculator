@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Calculator, Heart, Star, Mail } from 'lucide-react';
+import { Calculator, Heart, Star, Mail, MapPin } from 'lucide-react';
 
 const App = () => {
+  const [selectedSite, setSelectedSite] = useState('worcester');
   const [fundingType, setFundingType] = useState('15');
   const [fundingPattern, setFundingPattern] = useState('stretched');
   const [attendanceDays, setAttendanceDays] = useState([]);
@@ -18,11 +19,26 @@ const App = () => {
     '30': { stretched: 22.35, termTime: 30 }
   }), []);
 
-  const sessionTypes = useMemo(() => [
-    { value: 'full', label: 'Full Day (7:30am - 5:30pm)', hours: 10 },
-    { value: 'morning', label: 'Morning Session (7:30am - 12:30pm)', hours: 5 },
-    { value: 'afternoon', label: 'Afternoon Session (12:30pm - 5:30pm)', hours: 5 }
-  ], []);
+  const siteConfig = useMemo(() => ({
+    worcester: {
+      name: 'Worcester',
+      sessions: [
+        { value: 'full', label: 'Full Day (7:30am - 5:30pm)', hours: 10 },
+        { value: 'morning', label: 'Morning Session (7:30am - 12:30pm)', hours: 5 },
+        { value: 'afternoon', label: 'Afternoon Session (12:30pm - 5:30pm)', hours: 5 }
+      ]
+    },
+    bransford: {
+      name: 'Bransford',
+      sessions: [
+        { value: 'full', label: 'Full Day (7:45am - 5:45pm)', hours: 10 },
+        { value: 'morning', label: 'Morning Session (7:45am - 12:45pm)', hours: 5 },
+        { value: 'afternoon', label: 'Afternoon Session (12:45pm - 5:45pm)', hours: 5 }
+      ]
+    }
+  }), []);
+
+  const sessionTypes = useMemo(() => siteConfig[selectedSite].sessions, [siteConfig, selectedSite]);
 
   const daysOfWeek = useMemo(() => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], []);
 
@@ -76,7 +92,13 @@ const App = () => {
       totalEnrichmentFees: Math.round(totalEnrichmentFees * 100) / 100,
       weeklyFundingHours: Math.round(weeklyFundingHours * 100) / 100
     });
-  }, [fundingType, fundingPattern, attendanceDays, RATES, FUNDING_HOURS, sessionTypes, daysOfWeek]);
+  }, [selectedSite, fundingType, fundingPattern, attendanceDays, RATES, FUNDING_HOURS, sessionTypes, daysOfWeek]);
+
+  const handleSiteChange = (site) => {
+    setSelectedSite(site);
+    // Reset attendance days when changing sites since session types might be different
+    setAttendanceDays([]);
+  };
 
   const handleDayChange = (dayIndex, sessionType) => {
     const newAttendanceDays = [...attendanceDays];
@@ -130,6 +152,51 @@ const App = () => {
             <div className="flex items-center gap-3 mb-6">
               <Calculator className="w-8 h-8" style={{color: '#73c9bd'}} />
               <h2 className="text-2xl font-bold" style={{color: '#282829'}}>Calculate Your Fees</h2>
+            </div>
+
+            {/* Site Selection */}
+            <div className="mb-6">
+              <label className="block text-lg font-semibold mb-3" style={{color: '#282829'}}>
+                Which Little Lodge Nursery site?
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => handleSiteChange('worcester')}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    selectedSite === 'worcester' ? 'text-white' : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  style={selectedSite === 'worcester' ? {
+                    borderColor: '#73c9bd',
+                    background: 'linear-gradient(135deg, #73c9bd 0%, #64c5b8 100%)'
+                  } : {}}
+                >
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <MapPin className="w-5 h-5" />
+                    <div className="text-xl font-bold">Worcester</div>
+                  </div>
+                  <div className={`text-sm ${selectedSite === 'worcester' ? 'text-white opacity-90' : 'text-gray-600'}`}>
+                    Open 7:30am - 5:30pm
+                  </div>
+                </button>
+                <button
+                  onClick={() => handleSiteChange('bransford')}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    selectedSite === 'bransford' ? 'text-white' : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  style={selectedSite === 'bransford' ? {
+                    borderColor: '#73c9bd',
+                    background: 'linear-gradient(135deg, #73c9bd 0%, #64c5b8 100%)'
+                  } : {}}
+                >
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <MapPin className="w-5 h-5" />
+                    <div className="text-xl font-bold">Bransford</div>
+                  </div>
+                  <div className={`text-sm ${selectedSite === 'bransford' ? 'text-white opacity-90' : 'text-gray-600'}`}>
+                    Open 7:45am - 5:45pm
+                  </div>
+                </button>
+              </div>
             </div>
 
             {/* Funding Type Selection */}
@@ -210,6 +277,9 @@ const App = () => {
             <div className="mb-6">
               <label className="block text-lg font-semibold mb-3" style={{color: '#282829'}}>
                 Select Your Attendance Days
+                <span className="block text-sm font-normal text-gray-600 mt-1">
+                  {siteConfig[selectedSite].name} opening times
+                </span>
               </label>
               <div className="space-y-3">
                 {daysOfWeek.map((day, index) => (
@@ -260,6 +330,9 @@ const App = () => {
             <div className="flex items-center gap-3 mb-6">
               <Star className="w-8 h-8" style={{color: '#e5c83d'}} />
               <h2 className="text-2xl font-bold" style={{color: '#282829'}}>Your Fee Breakdown</h2>
+              <div className="ml-auto text-sm px-3 py-1 rounded-full" style={{backgroundColor: '#d5eeeb', color: '#73c9bd'}}>
+                {siteConfig[selectedSite].name}
+              </div>
             </div>
 
             {results ? (
