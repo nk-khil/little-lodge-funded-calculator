@@ -43,57 +43,56 @@ const App = () => {
   const daysOfWeek = useMemo(() => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], []);
 
   const calculateFees = useCallback(() => {
-    if (attendanceDays.filter(day => day).length === 0) {
-      setResults(null);
-      return;
-    }
+  if (attendanceDays.filter(day => day).length === 0) {
+    setResults(null);
+    return;
+  }
 
-    const weeklyFundingHours = FUNDING_HOURS[fundingType][fundingPattern];
-    let remainingFundingHours = weeklyFundingHours;
+  const weeklyFundingHours = FUNDING_HOURS[fundingType][fundingPattern];
+  let remainingFundingHours = weeklyFundingHours;
+  
+  const dailyBreakdown = attendanceDays.map((sessionType, dayIndex) => {
+    if (!sessionType) return null;
+
+    const session = sessionTypes.find(s => s.value === sessionType);
+    const sessionHours = session.hours;
     
-    const dailyBreakdown = attendanceDays.map((sessionType, dayIndex) => {
-      if (!sessionType) return null;
+    const fundedHours = Math.min(remainingFundingHours, sessionHours);
+    remainingFundingHours = Math.max(0, remainingFundingHours - fundedHours);
+    
+    const unfundedHours = sessionHours - fundedHours;
+    const unfundedCost = unfundedHours * RATES.hourlyRate;
+    
+    const isFullyFunded = fundedHours === sessionHours;
+    const enrichmentFee = isFullyFunded ? RATES.enrichmentFullyFunded : 
+                         (fundedHours > 0 ? RATES.enrichmentPartFunded : 0);
+    
+    const totalDailyCost = unfundedCost + enrichmentFee;
 
-      const session = sessionTypes.find(s => s.value === sessionType);
-      const sessionHours = session.hours;
-      
-      const fundedHours = Math.min(remainingFundingHours, sessionHours);
-      remainingFundingHours = Math.max(0, remainingFundingHours - fundedHours);
-      
-      const unfundedHours = sessionHours - fundedHours;
-      const unfundedCost = unfundedHours * RATES.hourlyRate;
-      
-      const isFullyFunded = fundedHours === sessionHours;
-      const enrichmentFee = isFullyFunded ? RATES.enrichmentFullyFunded : 
-                           (fundedHours > 0 ? RATES.enrichmentPartFunded : 0);
-      
-      const totalDailyCost = unfundedCost + enrichmentFee;
+    return {
+      day: daysOfWeek[dayIndex],
+      sessionType: session.label,
+      sessionHours,
+      fundedHours: Math.round(fundedHours * 100) / 100,
+      unfundedHours: Math.round(unfundedHours * 100) / 100,
+      unfundedCost: Math.round(unfundedCost * 100) / 100,
+      enrichmentFee: Math.round(enrichmentFee * 100) / 100,
+      totalDailyCost: Math.round(totalDailyCost * 100) / 100
+    };
+  }).filter(day => day !== null);
 
-      return {
-        day: daysOfWeek[dayIndex],
-        sessionType: session.label,
-        sessionHours,
-        fundedHours: Math.round(fundedHours * 100) / 100,
-        unfundedHours: Math.round(unfundedHours * 100) / 100,
-        unfundedCost: Math.round(unfundedCost * 100) / 100,
-        enrichmentFee: Math.round(enrichmentFee * 100) / 100,
-        totalDailyCost: Math.round(totalDailyCost * 100) / 100
-      };
-    }).filter(day => day !== null);
+  const totalWeeklyCost = dailyBreakdown.reduce((sum, day) => sum + day.totalDailyCost, 0);
+  const totalUnfundedCost = dailyBreakdown.reduce((sum, day) => sum + day.unfundedCost, 0);
+  const totalEnrichmentFees = dailyBreakdown.reduce((sum, day) => sum + day.enrichmentFee, 0);
 
-    const totalWeeklyCost = dailyBreakdown.reduce((sum, day) => sum + day.totalDailyCost, 0);
-    const totalUnfundedCost = dailyBreakdown.reduce((sum, day) => sum + day.unfundedCost, 0);
-    const totalEnrichmentFees = dailyBreakdown.reduce((sum, day) => sum + day.enrichmentFee, 0);
-
-    setResults({
-      dailyBreakdown,
-      totalWeeklyCost: Math.round(totalWeeklyCost * 100) / 100,
-      totalUnfundedCost: Math.round(totalUnfundedCost * 100) / 100,
-      totalEnrichmentFees: Math.round(totalEnrichmentFees * 100) / 100,
-      weeklyFundingHours: Math.round(weeklyFundingHours * 100) / 100
-    });
-  }, [selectedSite, fundingType, fundingPattern, attendanceDays, RATES, FUNDING_HOURS, sessionTypes, daysOfWeek]);
-
+  setResults({
+    dailyBreakdown,
+    totalWeeklyCost: Math.round(totalWeeklyCost * 100) / 100,
+    totalUnfundedCost: Math.round(totalUnfundedCost * 100) / 100,
+    totalEnrichmentFees: Math.round(totalEnrichmentFees * 100) / 100,
+    weeklyFundingHours: Math.round(weeklyFundingHours * 100) / 100
+  });
+}, [fundingType, fundingPattern, attendanceDays, RATES, FUNDING_HOURS, sessionTypes, daysOfWeek]);
   const handleSiteChange = (site) => {
     setSelectedSite(site);
     // Reset attendance days when changing sites since session types might be different
