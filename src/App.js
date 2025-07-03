@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Calculator, Heart, Star, Mail } from 'lucide-react';
 
 const App = () => {
@@ -7,24 +7,24 @@ const App = () => {
   const [attendanceDays, setAttendanceDays] = useState([]);
   const [results, setResults] = useState(null);
 
-  const RATES = {
+  const RATES = useMemo(() => ({
     hourlyRate: 9.10,
     enrichmentFullyFunded: 22.50,
     enrichmentPartFunded: 10.00
-  };
+  }), []);
 
-  const FUNDING_HOURS = {
+  const FUNDING_HOURS = useMemo(() => ({
     '15': { stretched: 11.18, termTime: 15 },
     '30': { stretched: 22.35, termTime: 30 }
-  };
+  }), []);
 
-  const sessionTypes = [
+  const sessionTypes = useMemo(() => [
     { value: 'full', label: 'Full Day (7:30am - 5:30pm)', hours: 10 },
     { value: 'morning', label: 'Morning Session (7:30am - 12:30pm)', hours: 5 },
     { value: 'afternoon', label: 'Afternoon Session (12:30pm - 5:30pm)', hours: 5 }
-  ];
+  ], []);
 
-  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  const daysOfWeek = useMemo(() => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], []);
 
   const calculateFees = useCallback(() => {
     if (attendanceDays.filter(day => day).length === 0) {
@@ -76,7 +76,7 @@ const App = () => {
       totalEnrichmentFees: Math.round(totalEnrichmentFees * 100) / 100,
       weeklyFundingHours: Math.round(weeklyFundingHours * 100) / 100
     });
-  }, [fundingType, fundingPattern, attendanceDays, RATES.hourlyRate, RATES.enrichmentFullyFunded, RATES.enrichmentPartFunded, FUNDING_HOURS, sessionTypes, daysOfWeek]);
+  }, [fundingType, fundingPattern, attendanceDays, RATES, FUNDING_HOURS, sessionTypes, daysOfWeek]);
 
   const handleDayChange = (dayIndex, sessionType) => {
     const newAttendanceDays = [...attendanceDays];
