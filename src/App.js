@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, Heart, Star, MapPin, Phone, Mail, Globe } from 'lucide-react';
+import { Calculator, Heart, Star, Mail } from 'lucide-react';
 
 const App = () => {
   const [fundingType, setFundingType] = useState('15');
@@ -7,25 +7,15 @@ const App = () => {
   const [attendanceDays, setAttendanceDays] = useState([]);
   const [results, setResults] = useState(null);
 
-  // Constants from the fee structure
   const RATES = {
-    fullDay: 91.00,
-    morningSession: 56.00,
-    afternoonSession: 50.00,
     hourlyRate: 9.10,
     enrichmentFullyFunded: 22.50,
     enrichmentPartFunded: 10.00
   };
 
   const FUNDING_HOURS = {
-    '15': {
-      stretched: 11.18, // 570 hours / 51 weeks
-      termTime: 15      // 15 hours per week for 38 weeks
-    },
-    '30': {
-      stretched: 22.35, // 1140 hours / 51 weeks
-      termTime: 30      // 30 hours per week for 38 weeks
-    }
+    '15': { stretched: 11.18, termTime: 15 },
+    '30': { stretched: 22.35, termTime: 30 }
   };
 
   const sessionTypes = [
@@ -67,15 +57,12 @@ const App = () => {
       const session = sessionTypes.find(s => s.value === sessionType);
       const sessionHours = session.hours;
       
-      // Calculate funded hours for this day
       const fundedHours = Math.min(remainingFundingHours, sessionHours);
       remainingFundingHours = Math.max(0, remainingFundingHours - fundedHours);
       
-      // Calculate remaining hours to pay for
       const unfundedHours = sessionHours - fundedHours;
       const unfundedCost = unfundedHours * RATES.hourlyRate;
       
-      // Determine enrichment fee
       const isFullyFunded = fundedHours === sessionHours;
       const enrichmentFee = isFullyFunded ? RATES.enrichmentFullyFunded : 
                            (fundedHours > 0 ? RATES.enrichmentPartFunded : 0);
@@ -112,17 +99,15 @@ const App = () => {
       {/* Header */}
       <div className="bg-white shadow-lg">
         <div className="max-w-6xl mx-auto">
-          {/* Custom Header Image */}
           <div className="w-full h-auto">
             <img 
               src="/header-image.png" 
-              alt="Little Lodge Nursery - Funded Hours Calculator - Solving Your Conversion Problems"
+              alt="Little Lodge Nursery - Funded Hours Calculator"
               className="w-full h-auto object-cover"
               style={{maxHeight: '200px'}}
             />
           </div>
           
-          {/* Contact Information */}
           <div className="px-4 py-4">
             <div className="flex justify-center">
               <a 
@@ -156,9 +141,7 @@ const App = () => {
                 <button
                   onClick={() => setFundingType('15')}
                   className={`p-4 rounded-xl border-2 transition-all ${
-                    fundingType === '15'
-                      ? 'text-white'
-                      : 'border-gray-200 hover:border-gray-300'
+                    fundingType === '15' ? 'text-white' : 'border-gray-200 hover:border-gray-300'
                   }`}
                   style={fundingType === '15' ? {
                     borderColor: '#73c9bd',
@@ -171,9 +154,7 @@ const App = () => {
                 <button
                   onClick={() => setFundingType('30')}
                   className={`p-4 rounded-xl border-2 transition-all ${
-                    fundingType === '30'
-                      ? 'text-white'
-                      : 'border-gray-200 hover:border-gray-300'
+                    fundingType === '30' ? 'text-white' : 'border-gray-200 hover:border-gray-300'
                   }`}
                   style={fundingType === '30' ? {
                     borderColor: '#73c9bd',
@@ -195,9 +176,7 @@ const App = () => {
                 <button
                   onClick={() => setFundingPattern('stretched')}
                   className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                    fundingPattern === 'stretched'
-                      ? 'text-white'
-                      : 'border-gray-200 hover:border-gray-300'
+                    fundingPattern === 'stretched' ? 'text-white' : 'border-gray-200 hover:border-gray-300'
                   }`}
                   style={fundingPattern === 'stretched' ? {
                     borderColor: '#73c9bd',
@@ -212,9 +191,7 @@ const App = () => {
                 <button
                   onClick={() => setFundingPattern('termTime')}
                   className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                    fundingPattern === 'termTime'
-                      ? 'text-white'
-                      : 'border-gray-200 hover:border-gray-300'
+                    fundingPattern === 'termTime' ? 'text-white' : 'border-gray-200 hover:border-gray-300'
                   }`}
                   style={fundingPattern === 'termTime' ? {
                     borderColor: '#73c9bd',
@@ -287,7 +264,6 @@ const App = () => {
 
             {results ? (
               <div className="space-y-6">
-                {/* Summary */}
                 <div className="text-white p-6 rounded-xl" style={{background: 'linear-gradient(135deg, #73c9bd 0%, #64c5b8 100%)'}}>
                   <h3 className="text-xl font-bold mb-4">Weekly Summary</h3>
                   <div className="grid grid-cols-2 gap-4">
@@ -302,7 +278,6 @@ const App = () => {
                   </div>
                 </div>
 
-                {/* Daily Breakdown */}
                 <div>
                   <h3 className="text-xl font-bold mb-4" style={{color: '#282829'}}>Daily Breakdown</h3>
                   <div className="space-y-4">
@@ -353,7 +328,6 @@ const App = () => {
                   </div>
                 </div>
 
-                {/* Cost Breakdown */}
                 <div className="p-4 rounded-lg text-white" style={{backgroundColor: '#73c9bd'}}>
                   <h4 className="font-bold mb-2">Weekly Cost Breakdown</h4>
                   <div className="space-y-1 text-sm">
@@ -386,7 +360,6 @@ const App = () => {
           </div>
         </div>
 
-        {/* Additional Information */}
         <div className="mt-8 bg-white rounded-2xl shadow-xl p-8">
           <div className="p-4 rounded-lg" style={{backgroundColor: '#fbd5c6', borderColor: '#f37343', border: '1px solid'}}>
             <p className="text-sm" style={{color: '#282829'}}>
