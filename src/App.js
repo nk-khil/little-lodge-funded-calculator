@@ -11,7 +11,10 @@ const App = () => {
   const RATES = useMemo(() => ({
     hourlyRate: 9.10,
     enrichmentFullyFunded: 22.50,
-    enrichmentPartFunded: 10.00
+    enrichmentPartFunded: 10.00,
+    fullDay: 91.00,
+    morningSession: 56.00,
+    afternoonSession: 50.00
   }), []);
 
   const FUNDING_HOURS = useMemo(() => ({
@@ -60,15 +63,29 @@ const App = () => {
       remainingFundingHours = Math.max(0, remainingFundingHours - fundedHours);
       
       const unfundedHours = sessionHours - fundedHours;
-      const unfundedCost = unfundedHours * RATES.hourlyRate;
       
-      // Corrected logic: Resource fee depends on whether it's a fully funded session
-      const isFullyFunded = fundedHours === sessionHours;
-      const isFullDaySession = session.value === 'full';
+      let unfundedCost = 0;
+      let enrichmentFee = 0;
       
-      // Full day sessions only get £22.50 if they're fully funded
-      // Otherwise they get £10 (like half-day sessions)
-      const enrichmentFee = (isFullDaySession && isFullyFunded) ? RATES.enrichmentFullyFunded : RATES.enrichmentPartFunded;
+      if (fundedHours === 0) {
+        // No funding hours used - charge full session rate with no resource fee
+        if (session.value === 'full') {
+          unfundedCost = RATES.fullDay;
+        } else if (session.value === 'morning') {
+          unfundedCost = RATES.morningSession;
+        } else if (session.value === 'afternoon') {
+          unfundedCost = RATES.afternoonSession;
+        }
+        enrichmentFee = 0; // No resource fee when paying full rates
+      } else {
+        // Some funding hours used - apply hourly rate for unfunded hours + resource fee
+        unfundedCost = unfundedHours * RATES.hourlyRate;
+        
+        // Resource fee logic
+        const isFullyFunded = fundedHours === sessionHours;
+        const isFullDaySession = session.value === 'full';
+        enrichmentFee = (isFullDaySession && isFullyFunded) ? RATES.enrichmentFullyFunded : RATES.enrichmentPartFunded;
+      }
       
       const totalDailyCost = unfundedCost + enrichmentFee;
 
