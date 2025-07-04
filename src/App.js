@@ -62,9 +62,13 @@ const App = () => {
       const unfundedHours = sessionHours - fundedHours;
       const unfundedCost = unfundedHours * RATES.hourlyRate;
       
-      // Fixed logic: Resource fee depends on session type, not funding status
+      // Corrected logic: Resource fee depends on whether it's a fully funded session
+      const isFullyFunded = fundedHours === sessionHours;
       const isFullDaySession = session.value === 'full';
-      const enrichmentFee = isFullDaySession ? RATES.enrichmentFullyFunded : RATES.enrichmentPartFunded;
+      
+      // Full day sessions only get £22.50 if they're fully funded
+      // Otherwise they get £10 (like half-day sessions)
+      const enrichmentFee = (isFullDaySession && isFullyFunded) ? RATES.enrichmentFullyFunded : RATES.enrichmentPartFunded;
       
       const totalDailyCost = unfundedCost + enrichmentFee;
 
