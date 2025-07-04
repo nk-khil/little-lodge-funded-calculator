@@ -63,9 +63,9 @@ const App = () => {
     const unfundedHours = sessionHours - fundedHours;
     const unfundedCost = unfundedHours * RATES.hourlyRate;
     
-    const isFullyFunded = fundedHours === sessionHours;
-    const enrichmentFee = isFullyFunded ? RATES.enrichmentFullyFunded : 
-                         (fundedHours > 0 ? RATES.enrichmentPartFunded : 0);
+    // Fixed logic: Resource fee depends on session type, not funding status
+    const isFullDaySession = session.value === 'full';
+    const enrichmentFee = isFullDaySession ? RATES.enrichmentFullyFunded : RATES.enrichmentPartFunded;
     
     const totalDailyCost = unfundedCost + enrichmentFee;
 
@@ -93,11 +93,6 @@ const App = () => {
     weeklyFundingHours: Math.round(weeklyFundingHours * 100) / 100
   });
 }, [fundingType, fundingPattern, attendanceDays, RATES, FUNDING_HOURS, sessionTypes, daysOfWeek]);
-  const handleSiteChange = (site) => {
-    setSelectedSite(site);
-    // Reset attendance days when changing sites since session types might be different
-    setAttendanceDays([]);
-  };
 
   const handleDayChange = (dayIndex, sessionType) => {
     const newAttendanceDays = [...attendanceDays];
