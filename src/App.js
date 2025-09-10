@@ -114,7 +114,6 @@ const App = () => {
 
   const handleSiteChange = (site) => {
     setSelectedSite(site);
-    // Reset attendance days when changing sites since session types might be different
     setAttendanceDays([]);
   };
 
@@ -136,7 +135,6 @@ const App = () => {
 
   return (
     <div className="min-h-screen" style={{backgroundColor: '#d5eeeb'}}>
-      {/* Header */}
       <div className="bg-white shadow-lg">
         <div className="max-w-6xl mx-auto">
           <div className="w-full h-auto">
@@ -165,14 +163,12 @@ const App = () => {
 
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Calculator Form */}
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="flex items-center gap-3 mb-6">
               <Calculator className="w-8 h-8" style={{color: '#73c9bd'}} />
               <h2 className="text-2xl font-bold" style={{color: '#282829'}}>Calculate Your Fees</h2>
             </div>
 
-            {/* Site Selection */}
             <div className="mb-6">
               <label className="block text-lg font-semibold mb-3" style={{color: '#282829'}}>
                 Which Little Lodge Nursery site?
@@ -217,7 +213,6 @@ const App = () => {
               </div>
             </div>
 
-            {/* Funding Type Selection */}
             <div className="mb-6">
               <label className="block text-lg font-semibold mb-3" style={{color: '#282829'}}>
                 Government Funding Hours
@@ -252,7 +247,6 @@ const App = () => {
               </div>
             </div>
 
-            {/* Funding Pattern Selection */}
             <div className="mb-6">
               <label className="block text-lg font-semibold mb-3" style={{color: '#282829'}}>
                 How would you like to use your funding?
@@ -291,7 +285,6 @@ const App = () => {
               </div>
             </div>
 
-            {/* Days Attendance */}
             <div className="mb-6">
               <label className="block text-lg font-semibold mb-3" style={{color: '#282829'}}>
                 Select Your Attendance Days
@@ -343,7 +336,6 @@ const App = () => {
             </div>
           </div>
 
-          {/* Results */}
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="flex items-center gap-3 mb-6">
               <Star className="w-8 h-8" style={{color: '#e5c83d'}} />
