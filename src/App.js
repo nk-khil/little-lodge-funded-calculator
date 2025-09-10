@@ -81,10 +81,8 @@ const App = () => {
         // Some funding hours used - apply hourly rate for unfunded hours + resource fee
         unfundedCost = unfundedHours * RATES.hourlyRate;
         
-        // Resource fee logic
-        const isFullyFunded = fundedHours === sessionHours;
-        const isFullDaySession = session.value === 'full';
-        enrichmentFee = (isFullDaySession && isFullyFunded) ? RATES.enrichmentFullyFunded : RATES.enrichmentPartFunded;
+        // Resource fee logic: £22.50 if funded hours > 5, otherwise £10
+        enrichmentFee = fundedHours > 5 ? RATES.enrichmentFullyFunded : RATES.enrichmentPartFunded;
       }
       
       const totalDailyCost = unfundedCost + enrichmentFee;
